@@ -1,46 +1,48 @@
-# M5Core2 and ThingSpeak Integration  
+# Lab 7.1: Using Thingspeak API  
 
-This project demonstrates how to prepare the M5Core2 for communication with ThingSpeak and create applications that utilize the ThingSpeak API for data logging and visualization.  
+## Overview  
+This project involves using a thermistor to measure temperature and display the results on the M5Core2 device. The thermistor is a temperature-dependent resistor, meaning its resistance changes with temperature. By utilizing a voltage divider circuit and a reference resistor, we can calculate the thermistor's resistance and subsequently determine the temperature.  
 
-## Setup Instructions  
+## Part 1: Thermistor Circuit  
+### Key Concepts  
+- **Thermistor**: A resistor whose resistance varies with temperature.  
+- **Voltage Divider**: A circuit used to measure voltage at a specific point, enabling resistance calculation.  
+- **Reference Resistor**: A resistor with a known value, chosen to minimize error (±20% of thermistor resistance at room temperature).  
 
-### 1. Install Required Libraries  
-- Open the Arduino IDE.  
-- Navigate to `Sketch > Include Library > Manage Libraries`.  
-- Search for **ThingSpeak by MATLAB** and install the library.  
+### Steps  
+1. **Determine Thermistor Resistance**:  
+    - Use a multimeter to measure the thermistor's resistance at room temperature.  
+    - Record this value in your lab report.  
 
-### 2. Download Example Code  
-- Visit the [ThingSpeak ESP Examples GitHub repository](https://github.com/nothans/thingspeak-esp-examples).  
-- Download the repository as a `.zip` file.  
-- Add the library to your Arduino libraries folder.  
+2. **Calculate Reference Resistor Value**:  
+    - Use the formula:  
+      `Reference Resistor = 3.4 Ohms for every 1 Ohm of thermistor resistance`.  
+    - Record the calculated value in your lab report.  
 
-### 3. Create a ThingSpeak Channel  
-- Go to [ThingSpeak](https://www.thingspeak.com) and create a free account.  
-- Create a new channel named **CSC320**.  
-- Add a field named **WiFi Strength**.  
-- After creating the channel, note the **Channel ID** and **Write API Key** from the Channel Settings page.  
+3. **Build the Circuit**:  
+    - Connect the thermistor, reference resistor, and M5Core2 as shown in the circuit diagram (`image.png`).  
+    - Take a picture of the completed circuit as the deliverable for Part 1.  
 
-### 4. Configure `secrets.h`  
-- Open the `secrets.h` file in the `thingspeak-esp-examples` directory.  
-- Update the file with the following information:  
-    - **WiFi SSID** and **Password**.  
-    - **Channel ID** and **Write API Key**.  
+## Part 2: Temperature Calculation  
+### Equation  
+Use the provided equation (EQ2) to calculate the thermistor's resistance and determine its temperature.  
 
-### 5. Record Data from M5Core2  
-- Use the sample code from the GitHub repository to create a program that records a number from the M5Core2 every minute.  
-- Display the recorded number on the M5Core2 screen.  
-- Add the following lines to your code to initialize the M5Core2 display:  
-    ```cpp  
-    #include <M5Core2>  
-    M5.begin();  
-    ```  
+### Programming Task  
+1. Write a program for the M5Core2 that:  
+    - Reads the thermistor temperature.  
+    - Displays the temperature in Celsius on the screen.  
 
-### 6. Create a Custom Application  
-- Develop a new application that uses ThingSpeak and the M5Core2 in a unique way.  
-- You can explore ThingSpeak apps (available in the topic menu bar on the ThingSpeak website) or use a different sensor for your project.  
+2. Test the program by recording three different temperatures.  
 
-## Additional Resources  
-- Refer to the tutorial in the GitHub repository's `README.md` for further guidance.  
-- Experiment with ThingSpeak's features to enhance your project.  
+## Deliverables  
+- **Part 1**:  
+  - Picture of the thermistor circuit.  
+  - Thermistor resistance and reference resistor values.  
 
-This project provides a foundation for integrating IoT devices with cloud-based data logging and visualization platforms.  
+- **Part 2**:  
+  - Program displaying thermistor temperature in Celsius.  
+  - Demonstration of three recorded temperatures.  
+
+## Notes  
+- The circuit and programming concepts will be discussed in class.  
+- Ensure all measurements and calculations are documented in your lab report.  

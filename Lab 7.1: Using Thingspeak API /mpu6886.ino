@@ -1,87 +1,72 @@
-/*
-  WriteSingleField
-  
-  Description: Writes a value to a channel on ThingSpeak every 20 seconds.
-  
-  Hardware: ESP32 based boards
-  
-  !!! IMPORTANT - Modify the secrets.h file for this project with your network connection and ThingSpeak channel details. !!!
-  
-  Note:
-  - Requires installation of EPS32 core. See https://github.com/espressif/arduino-esp32/blob/master/docs/arduino-ide/boards_manager.md for details. 
-  - Select the target hardware from the Tools->Board menu
-  - This example is written for a network using WPA encryption. For WEP or WPA, change the WiFi.begin() call accordingly.
-  
-  ThingSpeak ( https://www.thingspeak.com ) is an analytic IoT platform service that allows you to aggregate, visualize, and 
-  analyze live data streams in the cloud. Visit https://www.thingspeak.com to sign up for a free account and create a channel.  
-  
-  Documentation for the ThingSpeak Communication Library for Arduino is in the README.md folder where the library was installed.
-  See https://www.mathworks.com/help/thingspeak/index.html for the full ThingSpeak documentation.
-  
-  For licensing information, see the accompanying license file.
-  
-  Copyright 2020, The MathWorks, Inc.
-*/
-
-#include <WiFi.h>
-#include "secrets.h"
-#include "ThingSpeak.h" // always include thingspeak header file after other header files and custom macros
 #include <M5Core2.h>
 
+// Analog input pin for sensor
+const int sensorPin = 35;
 
-char ssid[] = SECRET_SSID;   // your network SSID (name) 
-char pass[] = SECRET_PASS;   // your network password
-int keyIndex = 0;            // your network key Index number (needed only for WEP)
-WiFiClient  client;
+// Variables for current readings
+float adcValue = 0.0;
+float voltage = 0.0;
 
-unsigned long myChannelNumber = SECRET_CH_ID;
-const char * myWriteAPIKey = SECRET_WRITE_APIKEY;
+// Variables to store max recorded values
+float maxAdcValue = 0.0;
+float maxVoltage = 0.0;
 
-float battery = 0;
+// Thermistor constants for Steinhart-Hart equation
+const float R0 = 10000.0; // Known resistor value (10k Ohm)
+const float c1 = 2.378405444e-04;
+const float c2 = 2.019202697e-07;
+const float c3 = 1.019452229e-07;
 
 void setup() {
-  M5.begin();
-  Serial.begin(115200);  //Initialize serial
-  while (!Serial) {
-    ; // wait for serial port to connect. Needed for Leonardo native USB port only
-  }
-  
-  WiFi.mode(WIFI_STA);   
-  ThingSpeak.begin(client);  // Initialize ThingSpeak
-  M5.Lcd.fillScreen(BLACK);
+  M5.begin();                          // Initialize M5Stack Core2
+  Serial.begin(9600);                 // Start serial communication
+  pinMode(sensorPin, INPUT);         // Set pin for analog input
+
+  M5.Lcd.fillScreen(BLACK);           // Clear the screen
+  M5.Lcd.setTextSize(2);              // Set text size
+  M5.Lcd.setTextColor(RED);          // Set text color
 }
 
-
 void loop() {
+  // Read and convert analog value to voltage
+  adcValue = analogRead(sensorPin);
+  voltage = (adcValue / 4095.0) * 3.3;
 
-  // Connect or reconnect to WiFi
-  if(WiFi.status() != WL_CONNECTED){
-    Serial.print("Attempting to connect to SSID: ");
-    Serial.println(SECRET_SSID);
-    while(WiFi.status() != WL_CONNECTED){
-      WiFi.begin(ssid, pass); // Connect to WPA/WPA2 network. Change this line if using open or WEP network
-      Serial.print(".");
-      delay(5000);     
-    } 
-    M5.Lcd.setCursor(50, 100);
-    M5.Lcd.setTextSize(2);
-    M5.Lcd.println("Connected.");
-    
-  }
-  battery = M5.Axp.GetBatVoltage();
-  // Write to ThingSpeak. There are up to 8 fields in a channel, allowing you to store up to 8 different
-  // pieces of information in a channel.  Here, we write to field 1.
-  int x = ThingSpeak.writeField(myChannelNumber, 1, battery, myWriteAPIKey);
-  if(x == 200){
-    Serial.println("Channel update successful.");
-  }
-  else{
-    M5.Lcd.println("Problem updating channel. HTTP error code " + String(x));
-  }
-  M5.Lcd.setCursor(50, 120);
-  M5.Lcd.printf("Bat Vol: %7.2f", battery);
+  // Update max values if current ones are greater
+  if (adcValue > maxAdcValue) maxAdcValue = adcValue;
+  if (voltage > maxVoltage) maxVoltage = voltage;
 
-  // change the value
-  
-  delay(60000); // Wait 20 seconds to update the channel again
+  // Calculate resistance from voltage
+  float resistance = R0 * ((4095.0 / adcValue) - 1.0);
+
+  // Calculate temperature using Steinhart-Hart equation
+  float logR = log(resistance);
+  float tempKelvin = 1.0 / (c1 + c2 * logR + c3 * pow(logR, 3));
+  float tempCelsius = tempKelvin - 273.15;
+  float tempFahrenheit = tempCelsius * 1.8 + 32.0;
+
+  // Clear display before printing new values
+  M5.Lcd.fillScreen(WHITE);
+
+  // Display ADC and voltage data
+  M5.Lcd.setCursor(0, 10);
+  M5.Lcd.printf("ADC Value: %.0f", adcValue);
+
+  M5.Lcd.setCursor(0, 30);
+  M5.Lcd.printf("Vol: %.2f V", voltage);
+
+  M5.Lcd.setCursor(0, 50);
+  M5.Lcd.printf("Max Volt: %.2f V", maxVoltage);
+
+  M5.Lcd.setCursor(0, 70);
+  M5.Lcd.printf("MaxADC: %.0f", maxAdcValue);
+
+  // Display temperature
+  M5.Lcd.setCursor(0, 90);
+  M5.Lcd.printf("Temperature: %.2f C", tempCelsius);
+
+  M5.Lcd.setCursor(0, 110);
+  M5.Lcd.printf("Temperature: %.2f F", tempFahrenheit);
+
+  delay(20000);  // Short delay before next update
 }
