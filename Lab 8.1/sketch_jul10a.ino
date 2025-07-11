@@ -31,8 +31,10 @@ void loop() {
 
   // 2. Act on it
   if (fireStatus == "OFF") {
+    // This is a  going to print words on the srceen 
     M5.Lcd.fillScreen(WHITE);
   } else if (fireStatus == "ON") {
+    // This is a  going to print words on the srceen 
     M5.Lcd.fillScreen(YELLOW);
   } else {
     Serial.print("Unexpected value: ");
@@ -40,5 +42,5 @@ void loop() {
   }
 
   // 3. Don’t hammer Firebase
-  delay(300);   // 0.3 s pause
+  delay(600);   // 0.3 s pause
 }
