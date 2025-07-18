@@ -42,5 +42,5 @@ void loop() {
   }
 
   // 3. Don’t hammer Firebase
-  delay(600);   // 0.3 s pause
+  delay(300);   // 0.3 s pause
 }
