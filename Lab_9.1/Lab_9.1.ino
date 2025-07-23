@@ -7,7 +7,7 @@
 #include "addons/TokenHelper.h"
 //Provide the RTDB payload printing info and other helper functions.
 #include "addons/RTDBHelper.h"
-// This is the wifi information so that I can get the the M5 connected to the WIFI. 
+// This is the wifi information so that I can get the the M5 connected to the WIFI.
 #define WIFI_SSID "Scytale"
 #define WIFI_PASSWORD "Chaumurky26"
 // Firebase project API Key
